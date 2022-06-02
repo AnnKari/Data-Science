@@ -26,12 +26,15 @@ cierre.index.names= ["Fecha"]
 #Datos mensuales
 cierre= cierre.resample("M").mean()
 
+#Tasas anuales 
 cierren = cierre.pct_change(12).mul(100)
 
-P_TOP5= plt.figure()
+#gráfica de series
+fig= plt.figure(figsize=(9,4)); ax = fig.add_subplot(1, 1, 1) 
 ax1= cierren[[ "REP.MC", "ELE.MC", "IBE.MC", "ENG.MC", "REE.MC", "ABG.MC", "PBR", "GAZP.ME", "XOM", "CVX", "PTR"]].plot(linewidth = 2, figsize=(9,7))
-plt.title('Precio de cierre las acciones de las Top 10 empresas de la BMV', fontsize=12)
-ax1.set_ylabel('Precios en pesos', fontsize=10)
+ax.plot(inf_nsub["Fecha"], inf_nsub['Inflacion_nsubyacente'], 'g', label='Inflación No Subyacente') 
+plt.title('Tasa de cambio del precio de las acciones de las empresas energéticas internacionales vs inflación mexicana', fontsize=12)
+ax1.set_ylabel('Tasa de cambio del precio de las acciones', fontsize=10)
 label_list = [(pd.to_datetime("2020-02-01"), "Crisis Covid", 'black')
 ]
 for date_point, label, clr in label_list:
