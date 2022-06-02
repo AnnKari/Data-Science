@@ -1,6 +1,10 @@
 
-#El presente c—digo realiza gr‡ficas de los precios y rendimiento de las top
-#10 empresas de la BMV.
+#Proyecto final de Ciencia de Datos
+#Predicción de stock market prices del sector energético internacional y su relación con la inflación no subyacente mexicana
+
+#Luis Alvarado
+#Karina Pérez
+#Fedra Pineda
 
 #Para descargar la base de datos es necesario usar la API de Yahoo Finance 
 #para eso se debe usar el comando "pip install yfinance" s—lo una vez.
