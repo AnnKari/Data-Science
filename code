@@ -1,0 +1,189 @@
+
+#El presente c—digo realiza gr‡ficas de los precios y rendimiento de las top
+#10 empresas de la BMV.
+
+#Para descargar la base de datos es necesario usar la API de Yahoo Finance 
+#para eso se debe usar el comando "pip install yfinance" s—lo una vez.
+
+#pip install yfinance
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import yfinance as yf
+
+
+#TOP 10 EMPRESAS MEXICANAS
+
+#Se debe conocers los tickers de las empresas mexicanas
+tickers= list(("GAPB.MX" , "ASURB.MX", "ALFAA.MX","GMEXICOB.MX", "WALMEX.MX", "GFNORTEO.MX","TLEVISACPO.MX","AMXL.MX", "CEMEXCPO.MX", "FEMSAUBD.MX"))
+
+#yf.download extraes toda la infromaci—n diaria de los tickers que metemos
+
+empresas= yf.download(tickers,period="1m", start= "2005-01-01", end= "2021-12-01")
+
+#vemos las columnas y se nota que hay doble indice
+empresas.columns
+
+#Limpiamos data
+#s—lo nos quedamos con los precios de cierre y el volumen
+cierre= pd.DataFrame(empresas.dropna(thresh=0, axis= 1)["Adj Close"]).dropna()
+cierre.head()
+cierre.describe()
+
+#Cambiamos nombre de las columnas y el indice
+cierre.columns=["Aeropue_P", "Aeropue_S", "ALFA", "GrupoMe", "WalmartMe", "Banorte", "Televisa", "America Movil", "CEMEX", "FEMSA"]
+cierre.index.names= ["Fecha"]
+
+#Datos mensuales
+cierre= cierre.resample("M").mean()
+
+plt.rcParams["font.family"] = "Times New Roman"
+#############################################################################
+#Figura 1: Precio de cierre de las 10 empresas 
+#Las 5 con m‡s retronos
+
+P_TOP5= plt.figure()
+ax1= cierre[[ "ALFA","WalmartMe","Banorte", "Televisa", "CEMEX"]].plot(linewidth = 2, figsize=(9,7))
+plt.title('Precio de cierre las acciones de las Top 10 empresas de la BMV', fontsize=12)
+ax1.set_ylabel('Precios en pesos', fontsize=10)
+label_list = [
+    (pd.to_datetime("2008-05-01"), 'Crisis 2009', 'black'),
+    (pd.to_datetime("2020-02-01"), "Crisis Covid", 'black')
+]
+for date_point, label, clr in label_list:
+    plt.axvline(x=date_point, color=clr, linestyle="--")
+    plt.text(date_point, ax1.get_ylim()[0]+7.4, label,
+             horizontalalignment='center',
+             verticalalignment='center',
+             color=clr,
+             bbox=dict(facecolor='white', alpha=1))
+
+plt.show()
+
+
+#############################################################################
+#Figura 2 Precios de cierre de la 6 a la 10
+colors = ["darkblue", "green", "purple", "slateblue", "brown"]
+P_Top10=plt.figure()
+ax1= cierre[[ "Aeropue_P", "Aeropue_S", "GrupoMe", "America Movil", "FEMSA"]].plot(linewidth = 2, figsize=(9,7), color=colors)
+plt.title('Precio de cierre las acciones de las Top 10 empresas de la BMV', fontsize=12)
+ax1.set_ylabel('Precios en pesos', fontsize=10)
+label_list = [
+    (pd.to_datetime("2008-05-01"), 'Crisis 2009', 'black'),
+    (pd.to_datetime("2020-02-01"), "Crisis Covid", 'black')
+]
+for date_point, label, clr in label_list:
+    plt.axvline(x=date_point, color=clr, linestyle="--")
+    plt.text(date_point, ax1.get_ylim()[0]+3, label,
+             horizontalalignment='center',
+             verticalalignment='center',
+             color=clr,
+             bbox=dict(facecolor='white', alpha=1))
+plt.show()
+
+
+############################################################################
+#Figura 3 boxplot de precios al cierre
+boxprops = dict(linestyle='-', linewidth=2, color='k')
+medianprops = dict(linestyle='-', linewidth=2, color='k')
+Bprecios_Top5= plt.figure()
+ax1=cierre[["ALFA","WalmartMe","Banorte", "Televisa", 
+            "CEMEX"]].boxplot(figsize=(9,7), notch=True, patch_artist=False,
+                              showfliers=False, showmeans=True,
+                              boxprops=boxprops,
+                              medianprops=medianprops)
+plt.title('Boxplot de los precios de cierre las acciones de las Top 10 empresas de la BMV', fontsize=12)
+ax1.set_ylabel('Precios en pesos', fontsize=10)
+plt.grid(False)
+
+#############################################################################
+#Figura 4 boxplot precios al cierre
+boxprops1 = dict(linestyle='-', linewidth=2, color='black')
+medianprops1 = dict(linestyle='-', linewidth=2, color='black')
+Bprecios_Top10= plt.figure()
+ax1=cierre[["Aeropue_P", "Aeropue_S", "GrupoMe", 
+            "America Movil", "FEMSA"]].boxplot(figsize=(10,7), notch=True, patch_artist=False,
+                              showfliers=False, showmeans=True,
+                              boxprops=boxprops1,
+                              medianprops=medianprops1)
+plt.title('Boxplot de los precios de cierre las acciones de las Top 10 empresas de la BMV', fontsize=12)
+ax1.set_ylabel('Precios en pesos', fontsize=10)
+plt.grid(False)
+
+
+##############################################################################
+#Ahora quiere los retornos de las empresas
+returns= cierre.pct_change(1)#Calculamos los retornos mensuales
+volatilidad_m= returns.rolling(12).std()*np.sqrt(12)#Volatilidad de 12 meses
+                                                                                                      
+#Figura 6 Volatilidad top 5
+V_TOP5= plt.figure()
+ax1= volatilidad_m[[ "ALFA","WalmartMe","Banorte", "Televisa", "CEMEX"]].plot(linewidth = 1.5, figsize=(9,7))
+plt.title('Volatilidad anual del precio de las acciones', fontsize=12)
+ax1.set_ylabel('', fontsize=10)
+label_list = [
+    (pd.to_datetime("2008-05-01"), 'Crisis 2009', 'black'),
+    (pd.to_datetime("2020-02-01"), "Crisis Covid", 'black')
+]
+for date_point, label, clr in label_list:
+    plt.axvline(x=date_point, color=clr, linestyle="--")
+    plt.text(date_point, ax1.get_ylim()[0]+0.01, label,
+             horizontalalignment='center',
+             verticalalignment='center',
+             color=clr,
+             bbox=dict(facecolor='white', alpha=1))
+
+plt.show()
+
+#Figura 6 Precios de cierre de la 6 a la 10
+V_Top10=plt.figure()
+ax1= volatilidad_m[[ "Aeropue_P", "Aeropue_S", "GrupoMe", "America Movil", "FEMSA"]].plot(linewidth = 1.5, figsize=(9,7), color=colors)
+plt.title('Volatilidad anual del precio de las acciones', fontsize=12)
+ax1.set_ylabel('', fontsize=10)
+label_list = [
+    (pd.to_datetime("2008-05-01"), 'Crisis 2009', 'black'),
+    (pd.to_datetime("2020-02-01"), "Crisis Covid", 'black')
+]
+for date_point, label, clr in label_list:
+    plt.axvline(x=date_point, color=clr, linestyle="--")
+    plt.text(date_point, ax1.get_ylim()[0]+0.01, label,
+             horizontalalignment='center',
+             verticalalignment='center',
+             color=clr,
+             bbox=dict(facecolor='white', alpha=1))
+plt.show()
+
+
+##################################################################################
+#Plots del volumen de las acciones
+
+volumen= pd.DataFrame(empresas.dropna(thresh=0, axis= 1)["Volume"]).dropna()
+
+#Cambiamos nombre de las columnas y el indice
+volumen.columns=["Aeropue_P", "Aeropue_S", "ALFA", "GrupoMe", "WalmartMe", "Banorte", "Televisa", "America Movil", "CEMEX", "FEMSA"]
+volumen.index.names= ["Fecha"]
+
+#Resampleamos por a–os de bussinnes (cada 5 dias) y s—lo queremos la media anual
+yaarly_vol = volumen.resample("BA").mean()
+
+
+#Barplot del volumen 
+#Barplot
+BP1, ax = plt.subplots()
+yaarly_vol[[ "ALFA","WalmartMe","Banorte", "Televisa", 
+            "CEMEX"]].plot(kind="bar", figsize=(10,7), stacked=True, 
+                                            ax=ax)
+plt.title("Volumen medio de las acciones de las Top 10 empresas de la BMV", fontsize=12)
+#Formato de x
+ax.set_xticklabels([x.strftime("%Y") for x in yaarly_vol.index], rotation=45)
+plt.show()
+
+#BarPlot 2
+BP2, ax = plt.subplots()
+yaarly_vol[[ "Aeropue_P", "Aeropue_S", "GrupoMe", 
+            "America Movil", "FEMSA"]].plot(kind="bar", figsize=(10,7), stacked=True, 
+                                            ax=ax, color=colors)
+plt.title("Volumen medio de las acciones de las Top 10 empresas de la BMV", fontsize=12)
+#Formato de x
+ax.set_xticklabels([x.strftime("%Y") for x in yaarly_vol.index], rotation=45)
+plt.show()
