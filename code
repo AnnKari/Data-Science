@@ -15,6 +15,12 @@ import numpy as np
 import yfinance as yf
 import pandas as pd
 
+#inflación no subyacente
+inf_nsub = pd.read_csv ('Inflación_nosubyacente_anual.csv')
+
+inf_nsub = inf_nsub.loc[326:466,]
+
+#stock market prices
 tickers= list(("REP.MC", "ELE.MC", "IBE.MC", "ENG.MC", "REE.MC", "ABG.MC", "PBR", "GAZP.ME", "XOM", "CVX", "PTR"))
 empresas= yf.download(tickers,period="1m", start= "2005-01-01", end= "2021-12-01")
 
