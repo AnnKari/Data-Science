@@ -11,16 +11,12 @@
 
 #pip install yfinance
 
-import numpy as np
-import yfinance as yf
 import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import yfinance as yf
 
-#inflación no subyacente
-inf_nsub = pd.read_csv ('Inflación_nosubyacente_anual.csv')
 
-inf_nsub = inf_nsub.loc[326:466,]
-
-#stock market prices
 tickers= list(("REP.MC", "ELE.MC", "IBE.MC", "ENG.MC", "REE.MC", "ABG.MC", "PBR", "GAZP.ME", "XOM", "CVX", "PTR"))
 empresas= yf.download(tickers,period="1m", start= "2005-01-01", end= "2021-12-01")
 
@@ -29,3 +25,20 @@ cierre= pd.DataFrame(empresas.dropna(thresh=0, axis= 1)["Close"]).dropna()
 cierre.index.names= ["Fecha"]
 #Datos mensuales
 cierre= cierre.resample("M").mean()
+
+P_TOP5= plt.figure()
+ax1= cierre[[ "REP.MC", "ELE.MC", "IBE.MC", "ENG.MC", "REE.MC", "ABG.MC"]].plot(linewidth = 2, figsize=(9,7))
+plt.title('Precio de cierre las acciones de las Top 10 empresas de la BMV', fontsize=12)
+ax1.set_ylabel('Precios en pesos', fontsize=10)
+label_list = [(pd.to_datetime("2020-02-01"), "Crisis Covid", 'black')
+]
+for date_point, label, clr in label_list:
+    plt.axvline(x=date_point, color=clr, linestyle="--")
+    plt.text(date_point, ax1.get_ylim()[0]+7.4, label,
+             horizontalalignment='center',
+             verticalalignment='center',
+             color=clr,
+             bbox=dict(facecolor='white', alpha=1))
+
+plt.show()
+
